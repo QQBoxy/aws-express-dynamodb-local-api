@@ -350,9 +350,6 @@ npm install serverless-offline --save-dev
 service: aws-express-dynamodb-local-api
 frameworkVersion: '3'
 
-custom:
-  tableName: 'users-table-${sls:stage}'
-
 provider:
   name: aws
   region: ap-northeast-1
@@ -371,7 +368,7 @@ provider:
           Resource:
             - Fn::GetAtt: [ UsersTable, Arn ]
   environment:
-    USERS_TABLE: ${self:custom.tableName}
+    USERS_TABLE: users
 
 plugins:
   - serverless-offline
@@ -381,7 +378,6 @@ functions:
     handler: index.handler
     events:
       - httpApi: '*'
-
 resources:
   Resources:
     UsersTable:
@@ -394,7 +390,7 @@ resources:
           - AttributeName: userId
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
-        TableName: ${self:custom.tableName}
+        TableName: users
 ```
 
 輸入 `serverless offline` 指令離線執行程式
