@@ -78,18 +78,91 @@ services:
  - Container dynamodb-local                        Started  1.4s
 ```
 
-最後執行 aws 命令 [^4] 來建立 Table
+### 使用 JS 程式自動建立 Table
+
+首先安裝範例程式需要的 `js-yaml` 套件：
 
 ```bash
-aws dynamodb create-table --table-name users-table-dev --attribute-definitions AttributeName=userId,AttributeType=S --key-schema AttributeName=userId,KeyType=HASH --billing-mode PAY_PER_REQUEST --endpoint-url http://localhost:8000
+npm install js-yaml
 ```
 
-> 建表不夠自動化，需要另外找方法
-> https://gist.github.com/adieuadieu/69d4df97cb3d59bc03a073b013ea06fe
+參考開源 gist [^6] 建立一支程式用來自動化建表。
+
+**create-tables-local.js**
+```javascript
+const fs = require('fs');
+const {
+  DynamoDBClient,
+  ListTablesCommand,
+  CreateTableCommand
+} = require("@aws-sdk/client-dynamodb");
+const yaml = require('js-yaml');
+const cloudformationSchema = require('@serverless/utils/cloudformation-schema');
+
+const SERVERLESS_CONFIG = __dirname + '/serverless.yml';
+
+const client = new DynamoDBClient({
+  region: 'local',
+  endpoint: 'http://localhost:8000',
+});
+
+async function getDynamoDBTableResources() {
+  const tables = Object.entries(
+    yaml.loadAll(fs.readFileSync(SERVERLESS_CONFIG), {
+      schema: cloudformationSchema,
+    })[0].resources.Resources,
+  ).filter(
+    ([, resource]) =>
+      resource.Type === 'AWS::DynamoDB::Table',
+  );
+
+  return tables;
+}
+
+(async function main() {
+  console.info('Setting up local DynamoDB tables');
+
+  const tables = await getDynamoDBTableResources();
+  const existingTables = (await client.send(new ListTablesCommand())).TableNames;
+
+  for await ([logicalId, definition] of tables) {
+    const {
+      Properties: {
+        BillingMode,
+        TableName,
+        AttributeDefinitions,
+        KeySchema,
+        GlobalSecondaryIndexes,
+        LocalSecondaryIndexes,
+      },
+    } = definition;
+
+    if (
+      existingTables.find((table) => table === TableName)
+    ) {
+      console.info(`${logicalId}: DynamoDB Local - Table already exists: ${TableName}. Skipping..`);
+      continue;
+    }
+
+    const input = {
+      AttributeDefinitions,
+      BillingMode,
+      KeySchema,
+      LocalSecondaryIndexes,
+      GlobalSecondaryIndexes,
+      TableName,
+    };
+
+    const result = await client.send(new CreateTableCommand(input));
+
+    console.info(`${logicalId}: DynamoDB Local - Created table: ${TableName}`);
+  }
+})();
+```
 
 ## 建立 CRUD 程式
 
-首先安裝範例程式需要的 `@aws-sdk/client-dynamodb` [^5] 、 `@aws-sdk/lib-dynamodb` [^6] 等套件：
+首先安裝範例程式需要的 `@aws-sdk/client-dynamodb` [^6] 、 `@aws-sdk/lib-dynamodb` [^7] 等套件：
 
 ```bash
 npm install @aws-sdk/client-dynamodb @aws-sdk/lib-dynamodb uuid
@@ -344,7 +417,7 @@ Server ready: http://localhost:3000 🚀
 
 ## 上線部署
 
-部署前請先設定好 AWS 憑證，可參考 AWS CLI 的命名設定檔 [^7] 教學。
+部署前請先設定好 AWS 憑證，可參考 AWS CLI 的命名設定檔 [^8] 教學。
 
 執行 `serverless deploy` 就會自動幫你部署到 AWS 雲端。
 
@@ -425,6 +498,7 @@ https://50hvx7ge4m.execute-api.ap-northeast-1.amazonaws.com
 [^2]: Serverless Examples, https://github.com/serverless/examples
 [^3]: DynamoDBLocal, https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html#docker
 [^4]: AWS Command Line Interface, https://aws.amazon.com/tw/cli/
-[^5]: @aws-sdk/client-dynamodb, https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-dynamodb/modules.html
-[^6]: @aws-sdk/lib-dynamodb, https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/modules/_aws_sdk_lib_dynamodb.html
-[^7]: AWS CLI 的命名設定檔, https://docs.aws.amazon.com/zh_tw/cli/latest/userguide/cli-configure-profiles.html
+[^5]: Using DynamoDB Locally in a Serverless Framework project, https://gist.github.com/adieuadieu/69d4df97cb3d59bc03a073b013ea06fe
+[^6]: @aws-sdk/client-dynamodb, https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-dynamodb/modules.html
+[^7]: @aws-sdk/lib-dynamodb, https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/modules/_aws_sdk_lib_dynamodb.html
+[^8]: AWS CLI 的命名設定檔, https://docs.aws.amazon.com/zh_tw/cli/latest/userguide/cli-configure-profiles.html
