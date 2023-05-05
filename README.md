@@ -160,6 +160,14 @@ async function getDynamoDBTableResources() {
 })();
 ```
 
+執行腳本 `node .\create-tables-local.js` 來建表。
+
+```bash
+❯ node .\create-tables-local.js
+Setting up local DynamoDB tables
+UsersTable: DynamoDB Local - Created table: users
+```
+
 ## 建立 CRUD 程式
 
 首先安裝範例程式需要的 `@aws-sdk/client-dynamodb` [^5] 、 `@aws-sdk/lib-dynamodb` [^6] 等套件：
