@@ -80,13 +80,13 @@ services:
 
 ### 使用 JS 程式自動建立 Table
 
-首先安裝範例程式需要的 `js-yaml` 套件：
+首先安裝範例程式需要的 `@aws-sdk/client-dynamodb` [^4] 、 `js-yaml` [^5] 套件：
 
 ```bash
-npm install js-yaml
+npm install @aws-sdk/client-dynamodb js-yaml
 ```
 
-參考開源 gist [^4] 建立一支程式用來自動化建表。
+參考開源 gist [^6] 建立一支程式用來自動化建表。
 
 **create-tables-local.js**
 ```javascript
@@ -170,7 +170,7 @@ UsersTable: DynamoDB Local - Created table: users
 
 ## 建立 CRUD 程式
 
-首先安裝範例程式需要的 `@aws-sdk/client-dynamodb` [^5] 、 `@aws-sdk/lib-dynamodb` [^6] 等套件：
+首先安裝範例程式需要的 `@aws-sdk/client-dynamodb` [^4] 、 `@aws-sdk/lib-dynamodb` [^7] 等套件：
 
 ```bash
 npm install @aws-sdk/client-dynamodb @aws-sdk/lib-dynamodb uuid
@@ -421,7 +421,7 @@ Server ready: http://localhost:3000 🚀
 
 ## 上線部署
 
-部署前請先設定好 AWS 憑證，可參考 AWS CLI 的命名設定檔 [^7] 教學。
+部署前請先設定好 AWS 憑證，可參考 AWS CLI 的命名設定檔 [^8] 教學。
 
 執行 `serverless deploy` 就會自動幫你部署到 AWS 雲端。
 
@@ -504,10 +504,12 @@ https://50hvx7ge4m.execute-api.ap-northeast-1.amazonaws.com
 
 [^3]: DynamoDBLocal, https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html#docker
 
-[^4]: Using DynamoDB Locally in a Serverless Framework project, https://gist.github.com/adieuadieu/69d4df97cb3d59bc03a073b013ea06fe
+[^4]: @aws-sdk/client-dynamodb, https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-dynamodb/modules.html
 
-[^5]: @aws-sdk/client-dynamodb, https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-dynamodb/modules.html
+[^5]: js-yaml, https://github.com/nodeca/js-yaml
 
-[^6]: @aws-sdk/lib-dynamodb, https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/modules/_aws_sdk_lib_dynamodb.html
+[^6]: Using DynamoDB Locally in a Serverless Framework project, https://gist.github.com/adieuadieu/69d4df97cb3d59bc03a073b013ea06fe
 
-[^7]: AWS CLI 的命名設定檔, https://docs.aws.amazon.com/zh_tw/cli/latest/userguide/cli-configure-profiles.html
+[^7]: @aws-sdk/lib-dynamodb, https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/modules/_aws_sdk_lib_dynamodb.html
+
+[^8]: AWS CLI 的命名設定檔, https://docs.aws.amazon.com/zh_tw/cli/latest/userguide/cli-configure-profiles.html
