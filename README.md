@@ -48,6 +48,60 @@ serverless invoke    Invoke deployed functions
 serverless --help    Discover more commands
 ```
 
+## 配置 yaml 設定
+
+修改 `serverless.yml` 設定，加入離線開發套件，然後 API 的部分可以先設定為 `*` 號來匹配所有路由，然後設定 dynamodb 的相關功能。
+
+> 注意，本範例教學的地區為 `ap-northeast-1` (東京) ，後續清除教學中的路徑都是以東京為例。
+
+**serverless.yml**
+```yaml
+service: aws-express-dynamodb-local-api
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  region: ap-northeast-1
+  runtime: nodejs18.x
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - Fn::GetAtt: [ UsersTable, Arn ]
+  environment:
+    USERS_TABLE: users
+
+plugins:
+  - serverless-offline
+
+functions:
+  api:
+    handler: index.handler
+    events:
+      - httpApi: '*'
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        TableName: users
+```
+
 ## 建立 DynamoDBLocal 資料庫
 
 目前網路上的教學大部分都是使用 `serverless-dynamodb-local` 套件建立 Local 版本的 DynamoDB，但是在 npm 上 可以看到套件已經被棄用，因此需要改使用 AWS 官方的 DynamoDBLocal [^3] 來啟動資料庫服務，並且自行手動建立資料庫、資料表、欄位等配置。
@@ -65,8 +119,12 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - "./docker/dynamodb:/home/dynamodblocal/data"
+      - "dynamodblocal:/home/dynamodblocal/data"
     working_dir: /home/dynamodblocal
+    user: root
+
+volumes:
+  dynamodblocal: null
 ```
 
 然後執行 `docker-compose up -d` 指令來建立並啟動 DynamoDBLocal ，結果如下：
@@ -80,10 +138,10 @@ services:
 
 ### 使用 JS 程式自動建立 Table
 
-首先安裝範例程式需要的 `@aws-sdk/client-dynamodb` [^4] 、 `js-yaml` [^5] 套件：
+首先安裝範例程式需要的 `@aws-sdk/client-dynamodb` [^4] 、 `js-yaml` [^5] 、 `serverless` 套件：
 
 ```bash
-npm install @aws-sdk/client-dynamodb js-yaml
+npm install @aws-sdk/client-dynamodb js-yaml serverless
 ```
 
 參考開源 gist [^6] 建立一支程式用來自動化建表。
@@ -333,64 +391,12 @@ app.delete("/users/:userId", async function (req, res) {
 module.exports.handler = serverless(app);
 ```
 
-## 配置 serverless-offline
+## 執行 serverless-offline
 
-安裝 `serverless-offline` 套件，它可以讓我們在離線環境下啟動 Lambda function 服務。
+首先安裝 `serverless-offline` 套件，它可以讓我們在離線環境下啟動 Lambda function 服務。
 
 ```bash
 npm install serverless-offline --save-dev
-```
-
-修改 `serverless.yml` 設定，加入離線開發套件，然後 API 的部分可以先設定為 `*` 號來匹配所有路由，然後設定 dynamodb 的相關功能。
-
-> 注意，本範例教學的地區為 `ap-northeast-1` (東京) ，後續清除教學中的路徑都是以東京為例。
-
-**serverless.yml**
-```yaml
-service: aws-express-dynamodb-local-api
-frameworkVersion: '3'
-
-provider:
-  name: aws
-  region: ap-northeast-1
-  runtime: nodejs18.x
-  iam:
-    role:
-      statements:
-        - Effect: Allow
-          Action:
-            - dynamodb:Query
-            - dynamodb:Scan
-            - dynamodb:GetItem
-            - dynamodb:PutItem
-            - dynamodb:UpdateItem
-            - dynamodb:DeleteItem
-          Resource:
-            - Fn::GetAtt: [ UsersTable, Arn ]
-  environment:
-    USERS_TABLE: users
-
-plugins:
-  - serverless-offline
-
-functions:
-  api:
-    handler: index.handler
-    events:
-      - httpApi: '*'
-resources:
-  Resources:
-    UsersTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: userId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: userId
-            KeyType: HASH
-        BillingMode: PAY_PER_REQUEST
-        TableName: users
 ```
 
 輸入 `serverless offline` 指令離線執行程式
