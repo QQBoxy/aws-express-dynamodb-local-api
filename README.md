@@ -13,7 +13,7 @@ AWS Lambda 有兩種開發風格，一種是 serverless framework 自己的寫�
 | 應用場景 | 簡單                 | 複雜            |
 | 支援平台 | AWS                  | AWS、GCP、Azure |
 
-## 使用 templete 建立環境
+## 使用 template 建立環境
 
 首先全域安裝 `serverless` 套件，建專案要用到。
 
