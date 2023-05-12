@@ -399,10 +399,10 @@ module.exports.handler = serverless(app);
 npm install serverless-offline --save-dev
 ```
 
-輸入 `serverless offline` 指令離線執行程式
+輸入 `serverless offline start --reloadHandler` 指令離線執行程式，其中 `--reloadHandler` 是熱更新，可以節省重啟的時間
 
 ```bash
-❯ serverless offline
+❯ serverless offline start --reloadHandler
 Running "serverless" from node_modules
 
 Starting Offline at stage dev (ap-northeast-1)

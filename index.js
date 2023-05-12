@@ -73,7 +73,7 @@ app.get("/users/:userId", async function (req, res) {
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "Could not retreive user" });
+    res.status(500).json({ error: "Could not retrieve user" });
   }
 });
 
@@ -86,7 +86,7 @@ app.get("/users", async function (req, res) {
     res.json({ Items, Count });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "Could not retreive user" });
+    res.status(500).json({ error: "Could not retrieve user" });
   }
 });
 
@@ -108,7 +108,7 @@ app.put("/users/:userId", async function (req, res) {
     res.json({ userId, name });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "Could not retreive user" });
+    res.status(500).json({ error: "Could not retrieve user" });
   }
 });
 
@@ -128,7 +128,7 @@ app.delete("/users/:userId", async function (req, res) {
     res.json({ userId });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error: "Could not retreive user" });
+    res.status(500).json({ error: "Could not retrieve user" });
   }
 });
 
