@@ -482,6 +482,20 @@ https://50hvx7ge4m.execute-api.ap-northeast-1.amazonaws.com
 
 ## 清除資料
 
+### 自動刪除資料
+
+執行 `serverless remove` 就會自動刪除 AWS 雲端的相關服務。
+
+```bash
+❯ serverless remove
+Running "serverless" from node_modules
+Removing aws-express-dynamodb-local-api from stage dev (ap-northeast-1)
+
+✔ Service aws-express-dynamodb-local-api has been successfully removed (6s)
+```
+
+### 手動清除資料
+
 這裡參考 AWS 教學課程的步驟 8 [^1] ，需要刪除的資源如下：
 
 * 刪除 DynamoDB 資料表
